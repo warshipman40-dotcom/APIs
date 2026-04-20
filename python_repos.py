@@ -61,16 +61,19 @@ for repo_dict in repo_dicts:
     stars.append(repo_dict["stargazers_count"])
     #turn repo names into active links
     repo_name = repo_dict["name"]
+    #uses the "html_url" key to get the url
     repo_url = repo_dict["html_url"]
+    #we use the html anchor tag to create a hyperlink using href
     repo_link = f"<a href = '{repo_url}'>{repo_name} </a>"
+    #this link is then appended to the list
     repo_links.append(repo_link)
     #Build hover texts
     #pulls the owner and description from the dictionaries
     owner = repo_dict["owner"]["login"]
-    descrption = repo_dict["description"]
+    description = repo_dict["description"]
     #plotly allows you to use HTML code within text elements 
     #we use <br /> for a new line
-    hover_text = f"{owner} <br /> {descrption}"
+    hover_text = f"{owner} <br /> {description}"
     #this labels is appended to out list
     hover_texts.append(hover_text)
 
@@ -81,7 +84,7 @@ labels = {"x" : "Repository Name ", "y" : "Stars "}
 #passes in the repository names, the number of stars, and label names
 #label names are added to the bars
 #hover_name takes in a single string
-#uses 
+#passes in repo_links for x so that when a person clicks the project name it sends them to the github link
 fig = px.bar(x = repo_links, y = stars, labels = labels, hover_name = hover_texts)
 #changes font sizes using update_layout()
 fig.update_layout(title_font_size = 28, xaxis_title_font_size = 20, yaxis_title_font_size = 20)
