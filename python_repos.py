@@ -2,12 +2,16 @@ import requests
 import plotly.express as px
 import plotly.graph_objects as go
 import statistics as st
+from deep_translator import GoogleTranslator
+
 #possible try to give them the option for the range of repos they want to get
 #make an API call
 #assigns the URL of the API call to the variable
 url = "https://api.github.com/search/repositories"
 #query string (sorts only language python and repositories with over 10,000 stars)
 url += "?q=language:python+sort:stars+stars:>10000"
+#this gives more repositories 
+url += "&per_page=50"
 #we make sure our header for the API call uses v3 of the API
 #returns results in the JSON format
 headers = {"Accept" : "application/vnd.github.v3+json"}
@@ -21,10 +25,10 @@ print(f"Status code: {r.status_code}")
 #since it is in json format, we use the json() method to convert to a python object
 response_dict = r.json()
 #prints the keys which gives us the contents
-print(response_dict.keys())
+#print(response_dict.keys())
 
-print(f"Total Repositories: {response_dict["total_count"]}")
-print(f"Complete results : {not response_dict["incomplete_results"]}")
+#print(f"Total Repositories: {response_dict["total_count"]}")
+#print(f"Complete results : {not response_dict["incomplete_results"]}")
 
 #explore information about the repositories
 #the value associated with items is a list containing a number of dictionaries
@@ -32,30 +36,6 @@ print(f"Complete results : {not response_dict["incomplete_results"]}")
 repo_dicts = response_dict["items"]
 #we print this to see how many repositories we have info for
 print(f"Repositories returned: {len(repo_dicts)}")
-
-#examines the first repository
-#repo_dict = repo_dicts[0]
-#prints the number of keys to see how much information we have
-#print(f"\nKeys: {len(repo_dict)}")
-#prints each individual key to see what kind of information is included
-#for key in sorted(repo_dict.keys()):
-    #print(key)
-
-# print("\nSelected information about repository one")
-# for repo_dict in repo_dicts:
-#     print(f"Name: {repo_dict["name"]}")
-#     #we use the key owner to access the dictionary representing the owner
-#     #then we use the key dictionary to access the login name
-#     print(f"Owner: {repo_dict["owner"]["login"]}")
-#     #we access the number of stars the project has earned
-#     print(f"Stars : {repo_dict["stargazers_count"]}")
-#     #we get the creation date
-#     print(f"Created: {repo_dict["created_at"]}")
-#     #we get the updated date
-#     print(f"Updated : {repo_dict["updated_at"]}")
-#     #we also get the description of the repository
-#     print(f"Description : {repo_dict["description"]}")
-
 #process repository information
 #three lists that store the names, number of stars, and hover_texts
 repo_links, stars, hover_texts = [], [], []
@@ -73,7 +53,13 @@ for repo_dict in repo_dicts:
     #Build hover texts
     #pulls the owner and description from the dictionaries
     owner = repo_dict["owner"]["login"]
-    description = repo_dict["description"]
+    #translates each description
+    #try and except because not all descriptions are valid
+    try:
+        description = GoogleTranslator(source = "auto", target = "en").translate(repo_dict["description"])
+    except Exception:
+        description = "No Description"
+        pass
     #plotly allows you to use HTML code within text elements 
     #we use <br /> for a new line
     hover_text = f"{owner} <br /> {description}"
