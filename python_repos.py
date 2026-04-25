@@ -1,6 +1,8 @@
 import requests
 import plotly.express as px
 import plotly.graph_objects as go
+import statistics as st
+#possible try to give them the option for the range of repos they want to get
 #make an API call
 #assigns the URL of the API call to the variable
 url = "https://api.github.com/search/repositories"
@@ -81,7 +83,7 @@ for repo_dict in repo_dicts:
 total_stars = sum(stars)
 total_repos = len(stars)
 average_stars = total_stars / total_repos
-
+median_stars = st.median(stars)
 #creates a bar graph of the most popular APIS
 title = "Most-Starred Python Projects on GitHub"
 #labels of the graph
@@ -112,6 +114,16 @@ fig.add_trace(
         line = dict(color = "black", dash = "dot", ), 
         #on hover, shows average stars %{y} represents the y_values or average stars
         hovertemplate = "Average Stars: %{y:,.2f}"
+    )
+)
+fig.add_trace(
+    go.Scatter(
+        x = repo_links, 
+        y = [median_stars] * len(repo_links),
+        mode = "lines",
+        name = "Median of Stars per Repository",
+        line = dict(color = "red", dash = "dot"),
+        hovertemplate = "Median Stars : %{y:,.2f}"
     )
 )
 #traces refers to the collection of data on our graph
