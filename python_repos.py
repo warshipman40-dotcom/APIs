@@ -95,6 +95,9 @@ fig = px.bar(x = repo_links, y = stars, title = title, labels = labels, hover_na
 #changes font sizes using update_layout()
 fig.update_layout(title_font_size = 28, xaxis_title_font_size = 20, yaxis_title_font_size = 20)
 #when we use "paper" as our system, 0 becomes far left edge of the chart while 1 becomes far right edge of chart
+#go.Scatter() will basically create a scatter plot, taking in x and y values
+#we can set the mode to lines to ensure that it is displayed as a line
+#using go.Scatter() was intentional so features like styling, legend, and hovertemplate were available
 fig.add_trace(
     go.Scatter(
         #ensures our x-axis is the same
@@ -108,7 +111,7 @@ fig.add_trace(
         #creates a black dotted line
         line = dict(color = "black", dash = "dot", ), 
         #on hover, shows average stars %{y} represents the y_values or average stars
-        hovertemplate = "Average Stars: %{y}"
+        hovertemplate = "Average Stars: %{y:,.2f}"
     )
 )
 #traces refers to the collection of data on our graph
