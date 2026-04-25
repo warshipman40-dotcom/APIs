@@ -1,5 +1,6 @@
 import requests
 import plotly.express as px
+import plotly.graph_objects as go
 #make an API call
 #assigns the URL of the API call to the variable
 url = "https://api.github.com/search/repositories"
@@ -31,7 +32,7 @@ repo_dicts = response_dict["items"]
 print(f"Repositories returned: {len(repo_dicts)}")
 
 #examines the first repository
-repo_dict = repo_dicts[0]
+#repo_dict = repo_dicts[0]
 #prints the number of keys to see how much information we have
 #print(f"\nKeys: {len(repo_dict)}")
 #prints each individual key to see what kind of information is included
@@ -64,7 +65,7 @@ for repo_dict in repo_dicts:
     #uses the "html_url" key to get the url
     repo_url = repo_dict["html_url"]
     #we use the html anchor tag to create a hyperlink using href
-    repo_link = f"<a href = '{repo_url}'>{repo_name} </a>"
+    repo_link = f"<a href='{repo_url}'>{repo_name}</a>"
     #this link is then appended to the list
     repo_links.append(repo_link)
     #Build hover texts
@@ -77,15 +78,48 @@ for repo_dict in repo_dicts:
     #this labels is appended to out list
     hover_texts.append(hover_text)
 
+total_stars = sum(stars)
+total_repos = len(stars)
+average_stars = total_stars / total_repos
+
 #creates a bar graph of the most popular APIS
 title = "Most-Starred Python Projects on GitHub"
 #labels of the graph
-labels = {"x" : "Repository Name ", "y" : "Stars "}
+labels = {"x" : "Repository Name", "y" : "Stars"}
 #passes in the repository names, the number of stars, and label names
 #label names are added to the bars
 #hover_name takes in a single string
 #passes in repo_links for x so that when a person clicks the project name it sends them to the github link
-fig = px.bar(x = repo_links, y = stars, labels = labels, hover_name = hover_texts)
+#hover_name passes in hover_texts so that when the user hovers over the bar, the tooltip is shown
+fig = px.bar(x = repo_links, y = stars, title = title, labels = labels, hover_name = hover_texts)
 #changes font sizes using update_layout()
 fig.update_layout(title_font_size = 28, xaxis_title_font_size = 20, yaxis_title_font_size = 20)
+#when we use "paper" as our system, 0 becomes far left edge of the chart while 1 becomes far right edge of chart
+fig.add_trace(
+    go.Scatter(
+        #ensures our x-axis is the same
+        x = repo_links, 
+        #this gives us a list (each index populated with average_stars) that has the len of the x-axis
+        y = [average_stars] * len(repo_links),
+        #ensures the line is shown as a line and not markers, etc
+        mode = "lines", 
+        #gives the label a name
+        name = "Average Stars per Repository",
+        #creates a black dotted line
+        line = dict(color = "black", dash = "dot", ), 
+        #on hover, shows average stars %{y} represents the y_values or average stars
+        hovertemplate = "Average Stars: %{y}"
+    )
+)
+#traces refers to the collection of data on our graph
+#update_traces() takes different arguments
+#any argument starting with marker_ affects markers on the chart
+#hoverlabel controls the visual style of the tooltip box
+#we set the background color of the tooltip box to black
+#we set the font_color of the tooltip box to white
+fig.update_traces(marker_color = "SteelBlue", marker_opacity = 0.7, 
+    hoverlabel = dict(
+        bgcolor = "black", 
+        font_color = "white"
+    ))
 fig.show()
