@@ -3,7 +3,48 @@ import plotly.express as px
 import plotly.graph_objects as go
 import statistics as st
 from deep_translator import GoogleTranslator
+import tkinter as tk
+import csv
 
+filename = "languages.csv"
+languages = {}
+with open(filename) as f:
+    reader = csv.reader(f)
+    #skips the first line
+    for line in range(1):
+        next(reader)
+    for row in reader:
+        language = row[0]
+        code = row[1]
+        languages[code] = language
+        
+root = tk.Tk()
+root.title("Input language")
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+scaled_widget_height = int(screen_height / 4)
+scaled_widget_width = int(screen_width / 4)
+screen_middle_width = (screen_width - scaled_widget_width) // 2
+screen_middle_height = (screen_height - scaled_widget_height) // 2
+root.geometry(f"{scaled_widget_width}x{scaled_widget_height}+{screen_middle_width}+{screen_middle_height}")
+
+frame = tk.Frame(root)
+tk.Label(frame, text = "Language").pack(pady = 10)
+frame.place(relx = 0.5, rely = 0.5, anchor = "center")
+entryOne = tk.Entry(frame)
+entryOne.pack(pady = 10)
+entryOne.focus()
+
+target_language = None
+def get_language():
+    target_language = entryOne.get().strip().title()
+    root.destroy()
+    return target_language
+
+
+tk.Button(frame, text = "Submit", command = get_language).pack(pady = 10)
+#print(get_language())
+root.mainloop()
 #possible try to give them the option for the range of repos they want to get
 #make an API call
 #assigns the URL of the API call to the variable
