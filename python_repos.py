@@ -6,49 +6,72 @@ from deep_translator import GoogleTranslator
 import tkinter as tk
 from tkinter import messagebox
 
-        
+#add comments and maybe next add a back button, and show a list of valid languages, etc
+#other possible next steps: give multiple options like most forked, most starred, etc
+#creates the root object   
 root = tk.Tk()
 root.title("Input language")
+#gets measurements such of screen width and height to style the widget accordingly
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 scaled_widget_height = int(screen_height / 4)
 scaled_widget_width = int(screen_width / 4)
 screen_middle_width = (screen_width - scaled_widget_width) // 2
 screen_middle_height = (screen_height - scaled_widget_height) // 2
+#ensures the root is sized appropriately
 root.geometry(f"{scaled_widget_width}x{scaled_widget_height}+{screen_middle_width}+{screen_middle_height}")
 
+#creates the frame to add a label and input box on
+#attaches the frame to the root
 frame = tk.Frame(root)
+#creates the label with 10 px of vertical padding
 tk.Label(frame, text = "Language").pack(pady = 10)
+#places the frame at the very center of the root
 frame.place(relx = 0.5, rely = 0.5, anchor = "center")
+#adds the entry to the frame, with 10 px of vertical padding
 entryOne = tk.Entry(frame)
 entryOne.pack(pady = 10)
+#focuses on the entry on start
 entryOne.focus()
 
+#creates a variable which automatically sets the target_language to none,
+#because the get_language() function does not return anything
 target_language = None
 #get_languages doesn't return because it's a command 
 def get_language():
     #creates global target_language so the value can be stored in that variable
     global target_language
+    #recieves the value upon clicking submit, capitalizing the first letter and stripping any possible whitespace
     target_language = entryOne.get().strip().title()
+    #destroys the root so it doesn't interfere anymore
     root.destroy()
-
+#creates the button
 tk.Button(frame, text = "Submit", command = get_language).pack(pady = 10)
 root.mainloop()
 print(target_language)
 #loop which checks the code and language within languages.items()
 #if there is a match with the target language it returns the target_code
-#else the default is english
 #creates a dictionary of the country and codes of the google_translator
 google_translator_dictionary = GoogleTranslator().get_supported_languages(as_dict=True)
+#default boolean (language is not found)
 languageFound = False
+#default target code is english
 target_code = "en"
+#loops over the language and code in the items of dictionary
 for language, code in google_translator_dictionary.items():
+    #checks if the submitted language matches any languages in the dictionary
     if target_language == language.title():
+        #if it matches, sets the target_code equal to code
         target_code = code
+        #sets languageFound as true
         languageFound = True
+        #shows a messagebox with info
         messagebox.showinfo("Message", f"Descriptions will be translated to {target_language}!")
+        #breaks the loop so it won't search anymore
         break
+#if the language is not found
 if not languageFound:
+    #shows that there is an invalid language, and uses english as default
     messagebox.showwarning("Invalid Language", "Invalid language, English will be used as default")
 messagebox.showinfo("Delay", "*Disclaimer* \nThere will be some delay for translations!")
 print(target_code)
@@ -147,6 +170,7 @@ fig.add_trace(
         #creates a black dotted line
         line = dict(color = "black", dash = "dot", ), 
         #on hover, shows average stars %{y} represents the y_values or average stars
+        #formats the average stars value
         hovertemplate = "Average Stars: %{y:,.2f}"
     )
 )
