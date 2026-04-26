@@ -4,15 +4,15 @@ import plotly.graph_objects as go
 import statistics as st
 from deep_translator import GoogleTranslator
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 class RepositoryData:
     """Class that uses Github API to extract data and uses several modules to improve user experience"""
-    #add comments and maybe next add a back button, and show a list of valid languages, etc
+    #NEXT PLAN : ADD A BUTTON WHICH GIVES YOU THE TEXT OPTION IF SELECT DOWN DOESN't WORK, OR DO SOMETHING ELSE TO THE TEXT OPTION
     #other possible next steps: give multiple options like most forked, most starred, etc
     #creates the root object
     def create_ui():
         """Creates the UI using Tkinter"""
-
         root = tk.Tk()
         root.title("Input language")
         #gets measurements such of screen width and height to style the widget accordingly
@@ -28,24 +28,29 @@ class RepositoryData:
         #creates the frame to add a label and input box on
         #attaches the frame to the root
         frame = tk.Frame(root)
-        #creates the label with 10 px of vertical padding
-        tk.Label(frame, text = "Language").pack(pady = 10)
         #places the frame at the very center of the root
         frame.place(relx = 0.5, rely = 0.5, anchor = "center")
-        #adds the entry to the frame, with 10 px of vertical padding
-        entryOne = tk.Entry(frame)
-        entryOne.pack(pady = 10)
-        #focuses on the entry on start
-        entryOne.focus()
-
+        #creates a label which instructs users to select their language
+        ttk.Label(frame, text = "Select your language:", font = ("Arial", 10)).pack()
+        #special tkinter variable which holds a string
+        #allows the widget to automatically update when variable changes
+        n = tk.StringVar()
+        #creates the dropdown menu, so when a user selects a language it display that langauge
+        language_chosen = ttk.Combobox(frame, width = 27, textvariable = n)
+        #["values"] must be used 
+        #shows the list of supported languages and allows them to be displayed
+        language_chosen["values"] = GoogleTranslator().get_supported_languages(as_dict=True).keys()
+        #.pack() allows these tkinter items to be displayed on the frame
+        language_chosen.pack()
+        #language_chosen.current(1)
     #creates a variable which automatically sets the target_language to none,
     #because the get_language() function does not return anything
     #get_languages doesn't return because it's a command 
         def get_language():
             #creates global target_language so the value can be stored in that variable
             global target_language
-            #recieves the value upon clicking submit, capitalizing the first letter and stripping any possible whitespace
-            target_language = entryOne.get().strip().title()
+            #recieves the value upon clicking submit, capitalizing the first letter and stripping any possible quotes or commas  
+            target_language = language_chosen.get().strip("'\",").title()
             #destroys the root so it doesn't interfere anymore
             root.destroy()
         
@@ -68,25 +73,25 @@ class RepositoryData:
         #creates a dictionary of the country and codes of the google_translator
         google_translator_dictionary = GoogleTranslator().get_supported_languages(as_dict=True)
         #default boolean (language is not found)
-        languageFound = False
         #default target code is english
         target_code = "en"
+        languageFound = False
         #loops over the language and code in the items of dictionary
         for language, code in google_translator_dictionary.items():
             #checks if the submitted language matches any languages in the dictionary
-            if target_language == language.title():
+            if target_language.lower() == language.lower().strip("'\","):
                 #if it matches, sets the target_code equal to code
                 target_code = code
                 #sets languageFound as true
                 languageFound = True
                 #shows a messagebox with info
                 messagebox.showinfo("Message", f"Descriptions will be translated to {target_language}!")
-                #breaks the loop so it won't search anymore
-                break
+        #         #breaks the loop so it won't search anymore
+        #         break
         #if the language is not found
         if not languageFound:
-            #shows that there is an invalid language, and uses english as default
-            messagebox.showwarning("Invalid Language", "Invalid language, English will be used as default")
+             #shows that there is an invalid language, and uses english as default
+             messagebox.showwarning("Invalid Language", "Invalid language, English will be used as default")
         #messagebox to show a disclaimer because there is delay
         messagebox.showinfo("Delay", "*Disclaimer* \nThere will be some delay for translations!")
         return target_code
@@ -237,13 +242,14 @@ class RepositoryData:
     #function calls
     try:
         target_language = create_ui()
+        print("Target language: " + repr(target_language))
         target_code = translation(target_language)
         repo_dicts = api_call()
         populated_dicts = populate_dicts(target_code, repo_dicts)
         average_stars = get_average_stars(populated_dicts[0], populated_dicts[1])
         median_stars = get_median_stars(populated_dicts[4])
-        #populated_dicts = [total_stars, total_repos, repo_links, hover_texts, stars]
-        #create_graph(repo_links, stars, hover_texts, average_stars, median_stars):
+            #populated_dicts = [total_stars, total_repos, repo_links, hover_texts, stars]
+            #create_graph(repo_links, stars, hover_texts, average_stars, median_stars):
         create_graph(populated_dicts[2], populated_dicts[4], populated_dicts[3], average_stars, median_stars)
     except:
         pass
