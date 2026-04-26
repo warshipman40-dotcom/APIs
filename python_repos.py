@@ -8,7 +8,7 @@ from tkinter import messagebox
 
 #add comments and maybe next add a back button, and show a list of valid languages, etc
 #other possible next steps: give multiple options like most forked, most starred, etc
-#creates the root object   
+#creates the root object
 root = tk.Tk()
 root.title("Input language")
 #gets measurements such of screen width and height to style the widget accordingly
@@ -45,6 +45,7 @@ def get_language():
     target_language = entryOne.get().strip().title()
     #destroys the root so it doesn't interfere anymore
     root.destroy()
+
 #creates the button
 tk.Button(frame, text = "Submit", command = get_language).pack(pady = 10)
 root.mainloop()
@@ -73,6 +74,7 @@ for language, code in google_translator_dictionary.items():
 if not languageFound:
     #shows that there is an invalid language, and uses english as default
     messagebox.showwarning("Invalid Language", "Invalid language, English will be used as default")
+#messagebox to show a disclaimer because there is delay
 messagebox.showinfo("Delay", "*Disclaimer* \nThere will be some delay for translations!")
 print(target_code)
 #possible try to give them the option for the range of repos they want to get
@@ -110,6 +112,7 @@ print(f"Repositories returned: {len(repo_dicts)}")
 #process repository information
 #three lists that store the names, number of stars, and hover_texts
 repo_links, stars, hover_texts = [], [], []
+translator = GoogleTranslator(source = "auto", target = target_code)
 for repo_dict in repo_dicts:
     #adds the information to the lists
     stars.append(repo_dict["stargazers_count"])
@@ -126,8 +129,9 @@ for repo_dict in repo_dicts:
     owner = repo_dict["owner"]["login"]
     #translates each description
     #try and except because not all descriptions are valid
+    description = repo_dict["description"] or "No Description"
     try:
-        description = GoogleTranslator(source = "auto", target = target_code).translate(repo_dict["description"])
+        description = translator.translate(repo_dict["description"])
     except Exception:
         description = "No Description"
         pass
