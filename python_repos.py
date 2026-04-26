@@ -14,8 +14,8 @@ with open(filename) as f:
     for line in range(1):
         next(reader)
     for row in reader:
-        language = row[0]
-        code = row[1]
+        code = row[0]
+        language = row[1]
         languages[code] = language
         
 root = tk.Tk()
@@ -37,14 +37,22 @@ entryOne.focus()
 
 target_language = None
 def get_language():
+    global target_language
     target_language = entryOne.get().strip().title()
     root.destroy()
-    return target_language
-
 
 tk.Button(frame, text = "Submit", command = get_language).pack(pady = 10)
 #print(get_language())
 root.mainloop()
+print(target_language)
+for code, language in languages.items():
+    if target_language == languages[code]:
+        target_code = code
+        break
+    else:
+        #default as english
+        target_code = "en"
+print(target_code)
 #possible try to give them the option for the range of repos they want to get
 #make an API call
 #assigns the URL of the API call to the variable
@@ -97,7 +105,7 @@ for repo_dict in repo_dicts:
     #translates each description
     #try and except because not all descriptions are valid
     try:
-        description = GoogleTranslator(source = "auto", target = "en").translate(repo_dict["description"])
+        description = GoogleTranslator(source = "auto", target = target_code).translate(repo_dict["description"])
     except Exception:
         description = "No Description"
         pass
