@@ -4,19 +4,8 @@ import plotly.graph_objects as go
 import statistics as st
 from deep_translator import GoogleTranslator
 import tkinter as tk
-import csv
+from tkinter import messagebox
 
-filename = "languages.csv"
-languages = {}
-with open(filename) as f:
-    reader = csv.reader(f)
-    #skips the first line
-    for line in range(1):
-        next(reader)
-    for row in reader:
-        code = row[0]
-        language = row[1]
-        languages[code] = language
         
 root = tk.Tk()
 root.title("Input language")
@@ -36,22 +25,32 @@ entryOne.pack(pady = 10)
 entryOne.focus()
 
 target_language = None
+#get_languages doesn't return because it's a command 
 def get_language():
+    #creates global target_language so the value can be stored in that variable
     global target_language
     target_language = entryOne.get().strip().title()
     root.destroy()
 
 tk.Button(frame, text = "Submit", command = get_language).pack(pady = 10)
-#print(get_language())
 root.mainloop()
 print(target_language)
-for code, language in languages.items():
-    if target_language == languages[code]:
+#loop which checks the code and language within languages.items()
+#if there is a match with the target language it returns the target_code
+#else the default is english
+#creates a dictionary of the country and codes of the google_translator
+google_translator_dictionary = GoogleTranslator().get_supported_languages(as_dict=True)
+languageFound = False
+target_code = "en"
+for language, code in google_translator_dictionary.items():
+    if target_language == language.title():
         target_code = code
+        languageFound = True
+        messagebox.showinfo("Message", f"Descriptions will be translated to {target_language}!")
         break
-    else:
-        #default as english
-        target_code = "en"
+if not languageFound:
+    messagebox.showwarning("Invalid Language", "Invalid language, English will be used as default")
+messagebox.showinfo("Delay", "*Disclaimer* \nThere will be some delay for translations!")
 print(target_code)
 #possible try to give them the option for the range of repos they want to get
 #make an API call
