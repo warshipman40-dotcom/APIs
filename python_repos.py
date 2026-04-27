@@ -38,11 +38,16 @@ class RepositoryData:
         #creates the dropdown menu, so when a user selects a language it display that langauge
         language_chosen = ttk.Combobox(frame, width = 27, textvariable = n)
         #["values"] must be used 
-        #shows the list of supported languages and allows them to be displayed
-        language_chosen["values"] = GoogleTranslator().get_supported_languages(as_dict=True).keys()
+        #stores the list of supported languages and allows them to be displayed
+        languages_dict = GoogleTranslator().get_supported_languages(as_dict=True)
+        #converts the dictionary keys to a list
+        #converting this dictionary into a list allows tkinter to see each individual string
+        language_chosen["values"] = list(languages_dict.keys())
+        print(language_chosen["values"])
         #.pack() allows these tkinter items to be displayed on the frame
         language_chosen.pack()
-        #language_chosen.current(1)
+        language_chosen.set("english")
+        #language_chosen.current() can be used with integers instead
     #creates a variable which automatically sets the target_language to none,
     #because the get_language() function does not return anything
     #get_languages doesn't return because it's a command 
@@ -59,7 +64,7 @@ class RepositoryData:
             messagebox.showinfo("Closing", "Closing... ")
             root.destroy()
 
-    #creates the button
+        #creates the submit button
         tk.Button(frame, text = "Submit", command = get_language).pack(pady = 10)
         #closes window on close instead of automatically going to english
         root.protocol("WM_DELETE_WINDOW", on_close)
