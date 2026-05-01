@@ -51,15 +51,18 @@ class RepositoryData:
         language_chosen.grid(row = 1, column = 2)
         language_chosen.set("English")
         m = tk.StringVar()
-        #progamming_language_chosen = ttk.Combobox(frame, width = 27, textvariable = m)
-        #progamming_language_chosen["values"] = ["C", "Python", "Java", "Javascript", "Typescript"]
-        #progamming_language_chosen.grid(row = 3, column = 2)
-        #progamming_language_chosen.current(2)
-        #language_chosen.current() can be used with integers instead
+        ttk.Label(frame, text = "Programming language: ", font = ("Arial", 10)).grid(row = 2, column = 1)
+        progamming_language_chosen = ttk.Combobox(frame, width = 27, textvariable = m)
+        #stores these values into our combobox widget
+        progamming_language_chosen["values"] = ["C", "Python", "Java", "Javascript", "Typescript"]
+        progamming_language_chosen.grid(row = 2, column = 2)
+        #sets a default programming language (python)
+        progamming_language_chosen.current(1)
+        #language_chosen.current() can be used with indexes instead
         #for number of stars, set the limitations later
         tk.Label(frame, text = "Number of Stars: ", font = ("Arial", 10)).grid(row = 3, column = 1, pady = 10)
         entry = tk.Entry(frame, width = 30)
-        entry.grid(row = 2, column = 2)
+        entry.grid(row = 3, column = 2)
         #inserts a default value for the entry
         entry.insert(0, 1000)
 
@@ -67,15 +70,16 @@ class RepositoryData:
     #because the get_language() function does not return anything
     #get_languages doesn't return because it's a command 
         def get_language():
-            #creates global target_language so the value can be stored in that variable
+            #creates global variables so that these variables can be access outside of the function
             global target_language
             global num_stars
             global programming_language
             #recieves the value upon clicking submit, capitalizing the first letter and stripping any possible quotes or commas  
             target_language = language_chosen.get().strip("'\",").title()
-            #programming_language = progamming_language_chosen.get()
+            programming_language = progamming_language_chosen.get()
             try:
-                num_stars = int(float(entry.get().strip()))
+                #has to turn it into int so we can check if its valid
+                num_stars = int(entry.get().strip())
             except ValueError:
                 messagebox.showwarning("Invalid Literal", "Please insert an integer!")
                 #prevents window from closing instead of going to root.destroy()
@@ -134,7 +138,7 @@ class RepositoryData:
         #assigns the URL of the API call to the variable
         url = "https://api.github.com/search/repositories"
         #query string (sorts only language python and repositories with over 10,000 stars)
-        url += f"?q=language:python+sort:stars+stars:>{num_stars}"
+        url += f"?q=language:{programming_language}+sort:stars+stars:>{num_stars}"
         #this gives more repositories 
         url += "&per_page=50"
         #we make sure our header for the API call uses v3 of the API
@@ -213,7 +217,7 @@ class RepositoryData:
     def create_graph(repo_links, stars, hover_texts, average_stars, median_stars):
         """Uses plotly to create a bar graph with features such as hyperlink and hovertext"""
         #creates a bar graph of the most popular APIS
-        title = "Most-Starred Python Projects on GitHub"
+        title = f"Most-Starred {programming_language.title()} Projects on GitHub"
         #labels of the graph
         labels = {"x" : "Repository Name", "y" : "Stars"}
         #passes in the repository names, the number of stars, and label names
@@ -283,5 +287,7 @@ class RepositoryData:
             #populated_dicts = [total_stars, total_repos, repo_links, hover_texts, stars]
             #create_graph(repo_links, stars, hover_texts, average_stars, median_stars):
         create_graph(populated_dicts[2], populated_dicts[4], populated_dicts[3], average_stars, median_stars)
+    #exception is stored as e
     except Exception as e:
+        #shows the error so we understand whats wrong
         messagebox.showerror("Error", e)
