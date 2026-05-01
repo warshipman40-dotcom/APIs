@@ -8,10 +8,13 @@ from tkinter import ttk
 from tkinter import messagebox
 class RepositoryData:
     """Class that uses Github API to extract data and uses several modules to improve user experience"""
+    #AFTER WE FINISH ADDING ALL THE REST OF THE FUNCTIONS / GUI ADD SELF AND CALL THE CLASS FROM DIFFERENT FILE FOR OBJECT ORIENTED PROGRAMMING
     #NEXT PLAN : ADD A BUTTON WHICH GIVES YOU THE TEXT OPTION IF SELECT DOWN DOESN't WORK, OR DO SOMETHING ELSE TO THE TEXT OPTION
     #other possible next steps: give multiple options like most forked, most starred, etc
     #creates the root object
     def create_ui():
+        #try making another combobox option that takes different languages, not just python and sees their repos
+        #example, using java or javascript, also allowing user to pick the number of stars they want (entrybox for that)
         """Creates the UI using Tkinter"""
         root = tk.Tk()
         root.title("Input language")
@@ -24,14 +27,13 @@ class RepositoryData:
         screen_middle_height = (screen_height - scaled_widget_height) // 2
         #ensures the root is sized appropriately
         root.geometry(f"{scaled_widget_width}x{scaled_widget_height}+{screen_middle_width}+{screen_middle_height}")
-
         #creates the frame to add a label and input box on
         #attaches the frame to the root
         frame = tk.Frame(root)
         #places the frame at the very center of the root
         frame.place(relx = 0.5, rely = 0.5, anchor = "center")
         #creates a label which instructs users to select their language
-        ttk.Label(frame, text = "Select your language:", font = ("Arial", 10)).pack()
+        ttk.Label(frame, text = "Select your language:", font = ("Arial", 10)).grid(row = 1, column = 1, padx = 5, pady = 10)
         #special tkinter variable which holds a string
         #allows the widget to automatically update when variable changes
         n = tk.StringVar()
@@ -42,30 +44,54 @@ class RepositoryData:
         languages_dict = GoogleTranslator().get_supported_languages(as_dict=True)
         #converts the dictionary keys to a list
         #converting this dictionary into a list allows tkinter to see each individual string
-        language_chosen["values"] = list(languages_dict.keys())
-        print(language_chosen["values"])
+        #uses list comprehension to capitalize each element within languages_dict.keys() by looping over them
+        language_chosen["values"] = list(lang.title() for lang in languages_dict.keys())
+        #print(language_chosen["values"])
         #.pack() allows these tkinter items to be displayed on the frame
-        language_chosen.pack()
-        language_chosen.set("english")
+        language_chosen.grid(row = 1, column = 2)
+        language_chosen.set("English")
+        m = tk.StringVar()
+        #progamming_language_chosen = ttk.Combobox(frame, width = 27, textvariable = m)
+        #progamming_language_chosen["values"] = ["C", "Python", "Java", "Javascript", "Typescript"]
+        #progamming_language_chosen.grid(row = 3, column = 2)
+        #progamming_language_chosen.current(2)
         #language_chosen.current() can be used with integers instead
+        #for number of stars, set the limitations later
+        tk.Label(frame, text = "Number of Stars: ", font = ("Arial", 10)).grid(row = 3, column = 1, pady = 10)
+        entry = tk.Entry(frame, width = 30)
+        entry.grid(row = 2, column = 2)
+        #inserts a default value for the entry
+        entry.insert(0, 1000)
+
     #creates a variable which automatically sets the target_language to none,
     #because the get_language() function does not return anything
     #get_languages doesn't return because it's a command 
         def get_language():
             #creates global target_language so the value can be stored in that variable
             global target_language
+            global num_stars
+            global programming_language
             #recieves the value upon clicking submit, capitalizing the first letter and stripping any possible quotes or commas  
             target_language = language_chosen.get().strip("'\",").title()
+            #programming_language = progamming_language_chosen.get()
+            try:
+                num_stars = int(float(entry.get().strip()))
+            except ValueError:
+                messagebox.showwarning("Invalid Literal", "Please insert an integer!")
+                #prevents window from closing instead of going to root.destroy()
+                entry.delete(0, "end")
+                return
             #destroys the root so it doesn't interfere anymore
             root.destroy()
-        
+        #closing function that destroys root, sets target_language to None to avoid a error message, and gives a closing message
         def on_close():
             target_language = None
             messagebox.showinfo("Closing", "Closing... ")
             root.destroy()
 
         #creates the submit button
-        tk.Button(frame, text = "Submit", command = get_language).pack(pady = 10)
+
+        tk.Button(frame, text = "Submit", command = get_language).grid(columnspan = 2, row = 4, column = 1, pady = 10)
         #closes window on close instead of automatically going to english
         root.protocol("WM_DELETE_WINDOW", on_close)
         root.mainloop()
@@ -91,8 +117,8 @@ class RepositoryData:
                 languageFound = True
                 #shows a messagebox with info
                 messagebox.showinfo("Message", f"Descriptions will be translated to {target_language}!")
-        #         #breaks the loop so it won't search anymore
-        #         break
+                #breaks the loop so it won't search anymore
+                break
         #if the language is not found
         if not languageFound:
              #shows that there is an invalid language, and uses english as default
@@ -108,7 +134,7 @@ class RepositoryData:
         #assigns the URL of the API call to the variable
         url = "https://api.github.com/search/repositories"
         #query string (sorts only language python and repositories with over 10,000 stars)
-        url += "?q=language:python+sort:stars+stars:>10000"
+        url += f"?q=language:python+sort:stars+stars:>{num_stars}"
         #this gives more repositories 
         url += "&per_page=50"
         #we make sure our header for the API call uses v3 of the API
@@ -248,6 +274,7 @@ class RepositoryData:
     try:
         target_language = create_ui()
         print("Target language: " + repr(target_language))
+        #print("Num stars: " + num_stars)
         target_code = translation(target_language)
         repo_dicts = api_call()
         populated_dicts = populate_dicts(target_code, repo_dicts)
@@ -256,5 +283,5 @@ class RepositoryData:
             #populated_dicts = [total_stars, total_repos, repo_links, hover_texts, stars]
             #create_graph(repo_links, stars, hover_texts, average_stars, median_stars):
         create_graph(populated_dicts[2], populated_dicts[4], populated_dicts[3], average_stars, median_stars)
-    except:
-        pass
+    except Exception as e:
+        messagebox.showerror("Error", e)
